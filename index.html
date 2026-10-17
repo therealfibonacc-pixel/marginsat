@@ -2054,7 +2054,8 @@ const REF_SHEET = (() => {
 
 const Exam = (() => {
   const B = S.bb = {dir:false, more:false, help:false, lr:false, lrY:220, lrH:86, split:50, loading:false, hlbar:null, refPos:null};
-  function saveSession(){ if(S.session) store.set("cb:session", S.session); }
+  // "live" remembers whether the test screen was open, so a reload drops the student straight back into the test
+  function saveSession(){ if(S.session){ S.session.live = S.sat.view === "exam"; store.set("cb:session", S.session); } }
   function curKey(){ const s = S.session; return s ? s.queue[s.step] : null; }
   function mstate(k){ const s = S.session;
     if(!s.mods[k]) s.mods[k] = {answers:{}, flags:{}, cross:{}, times:{}, remaining:(s.mins || MODS[k].mins)*60, cur:0, predicted:null, warned:false, hl:{}};
@@ -2252,7 +2253,7 @@ const Exam = (() => {
     if(want && !Calc.isOpen()){ s.calc = s.calc || {}; Calc.open(s.calc, saveSession, calcClosed); }
     else if(!want && Calc.isOpen()) Calc.hide();
   }
-  function leave(){ if(examActive()){ if(S.session.phase !== "break") S.session.paused = true; saveSession(); stopTimer(); } S.sat.view = S.sat.view === "exam" ? "home" : S.sat.view; closeTransient(); S.refOpen = false; B.lr = false; B.dir = false; syncCalc(); }
+  function leave(){ if(examActive()){ if(S.session.phase !== "break") S.session.paused = true; saveSession(); stopTimer(); } S.sat.view = S.sat.view === "exam" ? "home" : S.sat.view; if(S.session){ S.session.live = false; store.set("cb:session", S.session); } closeTransient(); S.refOpen = false; B.lr = false; B.dir = false; syncCalc(); }
 
   /* ----- Highlights & Notes ----- */
   const HLC = {y:"Yellow", b:"Blue", p:"Pink"};
@@ -3327,6 +3328,7 @@ document.addEventListener("visibilitychange", () => { if(document.hidden) Exam.s
 S.route = parseHash();
 hydrateDrills();
 render();
+if(S.session && S.session.live) Exam.resume();   // reloaded mid-test: go straight back in
 maybeTour();
 unlockStored();
 initPlatform();
