@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+  "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg xmlns:xlink="http://www.w3.org/1999/xlink" width="163.44pt" height="91.106667pt" viewBox="0 0 163.44 91.106667" xmlns="http://www.w3.org/2000/svg" version="1.1">
+ 
+ <defs>
+  <style type="text/css">*{stroke-linejoin: round; stroke-linecap: butt}</style>
+ </defs>
+ <g id="figure_1">
+  <g id="patch_1">
+   <path d="M 0 91.106667 
+L 163.44 91.106667 
+L 163.44 0 
+L 0 0 
+z
+" style="fill: #ffffff"/>
+  </g>
+  <g id="axes_1">
+   <g id="patch_2">
+    <path d="M 154.053333 81.72 
+C 154.053333 62.543365 146.427319 44.132538 132.867391 30.572609 
+C 119.307462 17.012681 100.896635 9.386667 81.72 9.386667 
+C 62.543365 9.386667 44.132538 17.012681 30.572609 30.572609 
+C 17.012681 44.132538 9.386667 62.543365 9.386667 81.72 
+" clip-path="url(#p4f3d82030c)" style="fill: none; stroke: #1e1e1e; stroke-width: 1.3; stroke-linejoin: miter"/>
+   </g>
+   <g id="line2d_1">
+    <path d="M 9.386667 81.72 
+L 154.053333 81.72 
+" clip-path="url(#p4f3d82030c)" style="fill: none; stroke: #1e1e1e; stroke-width: 1.3; stroke-linecap: square"/>
+   </g>
+   <g id="line2d_2">
+    <path d="M 49.37155 81.72 
+L 114.06845 81.72 
+L 114.06845 17.0231 
+L 49.37155 17.0231 
+L 49.37155 81.72 
+" clip-path="url(#p4f3d82030c)" style="fill: none; stroke: #1e1e1e; stroke-width: 1.3; stroke-linecap: square"/>
+   </g>
+   <g id="line2d_3">
+    <path d="M 81.72 81.72 
+L 114.06845 17.0231 
+" clip-path="url(#p4f3d82030c)" style="fill: none; stroke-dasharray: 4.07,1.76; stroke-dashoffset: 0; stroke: #1e1e1e; stroke-width: 1.1"/>
+   </g>
+   <g id="line2d_4">
+    <defs>
+     <path id="m23d46e46cb" d="M 0 1.75 
+C 0.464105 1.75 0.909265 1.565609 1.237437 1.237437 
+C 1.565609 0.909265 1.75 0.464105 1.75 0 
+C 1.75 -0.464105 1.565609 -0.909265 1.237437 -1.237437 
+C 0.909265 -1.565609 0.464105 -1.75 0 -1.75 
+C -0.464105 -1.75 -0.909265 -1.565609 -1.237437 -1.237437 
+C -1.565609 -0.909265 -1.75 -0.464105 -1.75 0 
+C -1.75 0.464105 -1.565609 0.909265 -1.237437 1.237437 
+C -0.909265 1.565609 -0.464105 1.75 0 1.75 
+z
+" style="stroke: #1e1e1e"/>
+    </defs>
+    <g clip-path="url(#p4f3d82030c)">
+     <use xlink:href="#m23d46e46cb" x="81.72" y="81.72" style="fill: #1e1e1e; stroke: #1e1e1e"/>
+    </g>
+   </g>
+  </g>
+ </g>
+ <defs>
+  <clipPath id="p4f3d82030c">
+   <rect x="3.6" y="3.6" width="156.24" height="83.906667"/>
+  </clipPath>
+ </defs>
+</svg>
