@@ -4,7 +4,7 @@ The site behind [marginsat.com](https://marginsat.com): five free, full-length S
 
 This repository holds the built site, served by GitHub Pages. Progress is saved in each visitor's browser; there is no server.
 
-- `index.html`: the practice app (tests, reports, history, redo drills, question bank, concept drills, guide). It holds a static copy of the home page so it shows before the test data loads.
+- `index.html`: the practice app (tests, reports, history, redo drills, question bank, concept drills, a checklist of every SAT skill with progress bars, guide). It holds a static copy of the home page so it shows before the test data loads.
 - `data/tests.<hash>.json`: the five tests, loaded by the app at startup
 - `assets/`: `app.css` (the app's styles), `katex.css` (math typesetting), `site.css` and `site.js` (landing pages)
 - `bank/`: the question bank, 628 original hard questions that aren't in the tests, on four levels up to Extreme, plus their figures. The app builds tailored practice sets from it based on every question a student has missed.
