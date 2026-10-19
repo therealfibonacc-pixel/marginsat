@@ -441,7 +441,7 @@ def sitemap(paths):
     urls = ["/", "/paper/"] + paths
     pri = {"/": "1.0", "/sat-practice-tests/": "0.9", "/sat-question-bank/": "0.9", "/sat-math-concepts/": "0.8", "/paper/": "0.7"}
     body = "".join("<url><loc>" + SITE + u + "</loc><lastmod>" + TODAY + "</lastmod>" + ("<priority>" + pri[u] + "</priority>" if u in pri else "") + "</url>\n" for u in urls)
-    wr("sitemap.xml", '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' + body + "</urlset>\n")
+    wr("sitemap.xml", '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9 http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">\n' + body + "</urlset>\n")
     return urls
 
 
