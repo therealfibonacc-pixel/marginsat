@@ -429,7 +429,6 @@ def privacy_page():
                  "<h3>Other services</h3><p>Pages load fonts from Google Fonts, which receives your IP address to deliver them. If the Desmos calculator is turned on, it loads from desmos.com. Links to other sites are covered by those sites’ own policies.</p>"
                  "<h3>Children</h3><p>Margin is meant for high school students preparing for the SAT and isn’t directed to children under 13. Margin doesn’t knowingly collect personal information from anyone.</p>"
                  "<h3>Changes</h3><p>If this policy changes, the new version will be posted here with a new date.</p>"
-                 '<h3>Questions</h3><p>See the <a href="/about/">About page</a> for how to reach Margin.</p>'
                  "</div>")
     path = "/privacy/"
     wr("privacy/index.html", page(path, "Privacy Policy | Margin", "How Margin handles information: practice data stays in your browser, cookie-free visit counts with GoatCounter, and Google AdSense advertising.",
