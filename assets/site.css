@@ -12,7 +12,7 @@
 .eyebrow a:hover{color:var(--cover-ink);text-decoration:underline;text-underline-offset:3px}
 .eyebrow span[aria-hidden]{opacity:.5}
 .hero .row{margin-top:24px}
-.hside{flex:none;display:grid;gap:14px;align-content:start;min-width:12rem;padding:20px 22px;border-radius:18px;background:rgba(255,255,255,.05);box-shadow:inset 0 0 0 1px rgba(255,255,255,.08)}
+.hside{flex:none;display:grid;gap:14px;align-content:start;min-width:12rem;padding:20px 22px;border-radius:12px;background:rgba(255,255,255,.05);box-shadow:inset 0 0 0 1px rgba(255,255,255,.08)}
 .hside div{display:grid;gap:2px}
 .hside b{font-weight:500;font-size:var(--t4);letter-spacing:-.04em;line-height:1;color:var(--cover-ink);font-variant-numeric:tabular-nums}
 .hside span{color:var(--cover-ink-2);font-size:var(--t-1)}
@@ -24,7 +24,7 @@
 
 /* worked examples */
 .exs{display:grid;gap:14px}
-.ex{border-radius:16px;background:var(--sheet-2);padding:18px 20px 16px;box-shadow:inset 0 0 0 1px var(--line)}
+.ex{border-radius:10px;background:var(--sheet-2);padding:18px 20px 16px;box-shadow:inset 0 0 0 1px var(--line)}
 .ex-lv{display:flex;align-items:center;gap:8px;margin:0 0 10px;color:var(--ink-3);font-size:var(--t-1);font-weight:500;letter-spacing:.02em}
 .ex-lv i{display:inline-flex;gap:3px}
 .ex-lv i b{width:7px;height:7px;border-radius:50%;background:var(--line-2)}
@@ -41,7 +41,7 @@
 .ex summary::-webkit-details-marker{display:none}
 .ex summary::after{content:"";width:7px;height:7px;border-right:1.6px solid currentColor;border-bottom:1.6px solid currentColor;transform:translateY(-2px) rotate(45deg);transition:transform .2s var(--ease)}
 .ex details[open] summary::after{transform:translateY(1px) rotate(-135deg)}
-.ex-ans{margin-top:10px;padding:12px 14px;border-radius:12px;background:var(--sheet);box-shadow:inset 0 0 0 1px var(--line);color:var(--ink-2);line-height:1.6}
+.ex-ans{margin-top:10px;padding:12px 14px;border-radius:8px;background:var(--sheet);box-shadow:inset 0 0 0 1px var(--line);color:var(--ink-2);line-height:1.6}
 .ex-ans .ok{display:block;margin-bottom:6px;color:var(--good);font-weight:600}
 .ex-src{margin-top:10px;color:var(--ink-3);font-size:var(--t-1)}
 
@@ -59,7 +59,7 @@
 .ticks li::before{content:"";position:absolute;left:3px;top:.48em;width:9px;height:5px;border-left:2px solid var(--dot);border-bottom:2px solid var(--dot);transform:rotate(-45deg)}
 .ticks b{color:var(--ink);font-weight:600}
 .tiers{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
-.tiers div{padding:16px 18px;border-radius:16px;background:var(--sheet-2);display:grid;gap:4px}
+.tiers div{padding:16px 18px;border-radius:10px;background:var(--sheet-2);display:grid;gap:4px}
 .tiers b{font-weight:500;font-size:var(--t4);letter-spacing:-.04em;line-height:1;font-variant-numeric:tabular-nums}
 .tiers span{color:var(--ink-2);font-weight:550}
 .tiers small{color:var(--ink-3);font-size:var(--t-1);line-height:1.4}

@@ -1224,3 +1224,58 @@ body:has(.bb) .toast{clip-path:none;border-radius:8px;background:#1E1E1E;color:#
 .loadfail .btn{margin-top:16px}
 .foot .foot-2{flex-basis:100%;margin-top:-4px}
 @media (max-width:560px){.foot .foot-2{margin-top:2px}}
+
+/* ===== how it works: three stations on a loop ===== */
+.how .how-art{display:block;width:100%;height:auto;margin:2px 0 6px;overflow:visible}
+.h-track{fill:none;stroke:var(--line-2);stroke-width:2;stroke-linecap:round}
+.h-track.back{stroke-dasharray:1 8}
+.h-head{fill:none;stroke:var(--ink-3);stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.h-tag{fill:var(--sheet);stroke:var(--line-2);stroke-width:1.5}
+.h-tagt{font:500 12px var(--f-ui);fill:var(--ink-2)}
+.h-box{fill:var(--sheet);stroke:var(--ink-3);stroke-width:1.6}
+.h-rule{stroke:var(--line-2);stroke-width:1.4}
+.h-acc{fill:var(--dot)}
+.h-txt{stroke:var(--ink-3);stroke-width:2.6;stroke-linecap:round;opacity:.5}
+.h-opt{fill:none;stroke:var(--line-2);stroke-width:1.3}
+.h-opt.on{stroke:var(--blue);stroke-width:1.8}
+.h-num{font:600 11px var(--f-ui);fill:var(--ink);letter-spacing:-.02em}
+.h-bar{stroke:var(--ink-3);stroke-width:5;stroke-linecap:round;opacity:.4}
+.h-bar.on{stroke:var(--dot);opacity:1}
+.h-loopi{fill:none;stroke:var(--ink-2);stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.h-dot{opacity:0;transition:opacity .3s var(--ease)}
+.h-dot.on{opacity:1}
+.h-ball{fill:var(--dot)}
+.h-eye{fill:#FFF8F0}
+.h-st .h-in{transform-box:fill-box;transform-origin:center}
+.h-st.hit .h-in{animation:hhit .65s var(--ease)}
+.h-st.hit .h-box{animation:hbox 1.4s var(--ease)}
+@keyframes hhit{0%{transform:scale(1)}35%{transform:scale(1.09)}100%{transform:scale(1)}}
+@keyframes hbox{0%,45%{stroke:var(--dot);stroke-width:2.2}100%{stroke:var(--ink-3);stroke-width:1.6}}
+.how-steps{list-style:none;padding:0;margin:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr))}
+.how-steps li{padding:0 18px;text-align:center}
+.how-steps b{display:block;font-weight:600;font-size:var(--t1);letter-spacing:-.015em;margin-bottom:4px;color:var(--ink)}
+.how-steps p{color:var(--ink-2);line-height:1.5;max-width:31ch;margin:0 auto}
+.how-steps a{color:var(--accent-ink);text-decoration:underline;text-decoration-color:color-mix(in srgb,var(--accent-ink) 35%,transparent);text-underline-offset:3px}
+.how-steps a:hover{text-decoration-color:currentColor}
+.how-ic{display:none}
+.how-then{margin-top:20px;text-align:center;color:var(--ink-3);font-size:var(--t-1)}
+@media (max-width:720px){
+  .how .how-art{display:none}
+  .how-steps{grid-template-columns:minmax(0,1fr);gap:18px}
+  .how-steps li{display:grid;grid-template-columns:64px minmax(0,1fr);gap:14px;align-items:start;padding:0;text-align:left}
+  .how-ic{display:block;width:64px;height:46px;margin-top:2px}
+  .how-steps p{margin:0}
+  .how-then{text-align:left;margin-top:16px}
+}
+
+/* ===== corners: tighter on the large surfaces, small controls unchanged ===== */
+.sheet,.adbox{border-radius:12px}
+.tlist > :last-child,.qlist > .qrow:last-child,.qlist > .qrow:last-child summary,.qa > details:last-child,.qa > details:last-child summary{border-radius:0 0 12px 12px}
+.bar,.menu{border-radius:13px}
+.drawer,.tprice > div,.tcard,.mepop,.callout,.art-doc .ex,.art-doc .key,.art-doc .kit,.art-doc .trap,.qstats li,.bk-points li,.cn-card{border-radius:10px}
+.formula,.secs > div,.mcell,.tagbox,.hq-why,.bk-focus li,.toast,.tspot{border-radius:9px}
+.dm-win{border-radius:9px}
+.promo > div:first-child{display:grid;gap:8px}
+.main > .promo{grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:14px 28px}
+.main > .promo .row{margin-top:0}
+@media (max-width:720px){.main > .promo{grid-template-columns:minmax(0,1fr)}}

@@ -392,7 +392,7 @@ def guide_page():
 # ------------------------------------------------------------------ about and privacy
 def about_page():
     body = sheet('<div class="doc legal" style="padding:0">'
-                 "<p>Margin is free SAT practice made by Lamai Hons, who scored 1560 on the SAT. "
+                 "<p>Margin is free SAT practice made by Lamai Hons. "
                  "It started as the practice he wanted for himself: tests that feel like Bluebook, questions harder than the real thing, and explanations that name the trap instead of just giving the answer.</p>"
                  "<h3>What’s here</h3><ul><li><a href=\"/sat-practice-tests/\">Five full-length practice tests</a> in a Bluebook-style screen, plus PDFs for <a href=\"/paper/\">paper mode</a>.</li>"
                  "<li>A <a href=\"/sat-question-bank/\">bank of 628 hard questions</a> with Tailored practice built from your misses.</li>"
@@ -401,13 +401,13 @@ def about_page():
                  "<h3>How it’s made</h3><p>Every test and bank question is written from scratch and tagged with College Board’s own skill names. Math answers are checked by solving each question again independently, and every Reading and Writing question is reread to make sure exactly one answer holds up. "
                  "<a href=\"/sat-guide/\">The guide</a> explains the details.</p>"
                  "<h3>Why it’s free</h3><p>Margin has no accounts and no paywall. Your progress stays in your own browser. Ads, when they appear, help pay for the domain so the tests can stay free.</p>"
-                 "<h3>Tutoring</h3><p>Lamai also offers <a href=\"/#tutoring\">1:1 SAT tutoring</a>.</p>"
+                 "<h3>Tutoring</h3><p>Lamai also offers <a href=\"/#tutoring\">1:1 SAT tutoring</a>, and the first session is free.</p>"
                  "<h3>Not affiliated with College Board</h3><p>Margin is independent. It isn’t affiliated with or endorsed by College Board, which owns the SAT and Bluebook trademarks.</p>"
                  "</div>")
     path = "/about/"
     person = {"@type": "AboutPage", "url": SITE + path, "mainEntity": {"@id": SITE + "/#org"}}
-    wr("about/index.html", page(path, "About Margin", "Margin is free, independent SAT practice made by Lamai Hons, who scored 1560 on the SAT: five Bluebook-style tests, a hard question bank and concept drills.",
-                                "About Margin", "Free, independent SAT practice, made by a student who scored 1560.", body, ld=[person]))
+    wr("about/index.html", page(path, "About Margin", "Margin is free, independent SAT practice made by Lamai Hons: five Bluebook-style tests, a bank of 628 hard questions, and 26 SAT Math concept drills.",
+                                "About Margin", "Free, independent SAT practice for the digital SAT.", body, ld=[person]))
     return [path]
 
 
