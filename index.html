@@ -4,7 +4,7 @@
 <script>if(location.protocol==="http:"&&location.hostname.endsWith("marginsat.com"))location.replace("https://"+location.host+location.pathname+location.search+location.hash)</script>
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <script>(function(){var h=location.hash.replace(/^#/,""),k=0;try{for(var i=0;i<localStorage.length;i++){var n=localStorage.key(i);if(/^cb:/.test(n)&&n!=="cb:toured"){k=1;break}}}catch(e){}if(k||(h&&h!=="home"&&h!=="tests"))document.documentElement.classList.add("nopre")})()</script>
-<link rel="preload" href="data/tests.4d0e9fb51a.json" as="fetch" crossorigin="anonymous">
+<link rel="preload" href="data/tests.0869ce00af.json" as="fetch" crossorigin="anonymous">
 <title>Free SAT Practice Tests, Bluebook-Style | Margin</title>
 <meta name="description" content="Five free full-length SAT practice tests in a Bluebook-style screen, 628 harder questions and 26 Math concept drills, with every answer explained. No sign-up.">
 <link rel="canonical" href="https://marginsat.com/">
@@ -1014,7 +1014,8 @@ const Exam = (() => {
     if(!s.mods[k]) s.mods[k] = {answers:{}, flags:{}, cross:{}, times:{}, remaining:(s.mins || MODS[k].mins)*60, cur:0, predicted:null, warned:false, hl:{}};
     if(!s.mods[k].hl) s.mods[k].hl = {};
     return s.mods[k]; }
-  function qs(test,k){ return TESTDATA[test][k]; }
+  function archived(a,k){ const r = a && a.results && a.results[k], A = DATA.archive && DATA.archive[a.test]; return !!(r && A && A[k] && (r.submittedAt || a.createdAt || 0) < A[k].until); }
+  function qs(test,k,a){ return a && archived(a,k) ? DATA.archive[test][k].qs : TESTDATA[test][k]; }
   function answered(v){ return v != null && String(v).trim() !== ""; }
   function sprNum(s){ s = String(s||"").trim(); if(/^-?(\d+\.?\d*|\.\d+)$/.test(s)) return parseFloat(s);
     const m = s.match(/^(-?\d+)\/(\d+)$/); if(m && +m[2] !== 0) return (+m[1]) / (+m[2]); return NaN; }
@@ -1412,7 +1413,7 @@ const Exam = (() => {
   function resume(){ const s = S.session; if(!s) return; S.sat.view = "exam"; S.confirm = null; closeTransient();
     if(s.phase === "intro") s.phase = "q"; if(s.phase !== "break") s.paused = true; B.dir = false; saveSession(); startTimer(); render(); toTop(); }
   function discard(){ S.session = null; store.del("cb:session"); stopTimer(); syncCalc(); }
-  return {start, resume, discard, examView, examActive, click, input, key, escape, saveSession, stopTimer, snap, after, leave, syncCalc, qs, isCorrect, answered, mstate, curKey};
+  return {start, resume, discard, examView, examActive, click, input, key, escape, saveSession, stopTimer, snap, after, leave, syncCalc, qs, archived, isCorrect, answered, mstate, curKey};
 })();
 
 /* ================= scoring ================= */
@@ -1459,8 +1460,8 @@ function redoBank(){
       a.items.forEach((ref, i) => { if(ref.t === "B") return; const q = findQ(ref); if(!q) return; const n = i + 1, bl = isBlank(r.answers[n]);
         latest[ref.t + "|" + ref.k + "|" + ref.n] = {t:ref.t, k:ref.k, q, missed:!bl && !r.correct[n], blank:bl, slow:(r.times[n] || 0) > slowLimit(ref.k), at:a.createdAt}; });
       continue; }
-    for(const k of MODS_ORDER){ const r = a.results[k]; if(!r || skippedMod(r) || !TESTDATA[a.test]) continue;
-      for(const q of Exam.qs(a.test, k)){ const bl = isBlank(r.answers[q.n]), missed = !bl && !r.correct[q.n], slow = (r.times[q.n] || 0) > slowLimit(k);
+    for(const k of MODS_ORDER){ const r = a.results[k]; if(!r || skippedMod(r) || !TESTDATA[a.test] || Exam.archived(a, k)) continue;
+      for(const q of Exam.qs(a.test, k, a)){ const bl = isBlank(r.answers[q.n]), missed = !bl && !r.correct[q.n], slow = (r.times[q.n] || 0) > slowLimit(k);
         latest[a.test + "|" + k + "|" + q.n] = {t:a.test, k, q, missed, blank:bl, slow, at:a.createdAt}; } }
   }
   return Object.values(latest).filter(x => x.missed || x.slow || x.blank);
@@ -1687,7 +1688,7 @@ function testsSheet(){ return '<section class="sheet" id="tests"' + rv(3) + '><h
 function domainStats(){
   const D = {};
   for(const a of attemptsList()) for(const k of MODS_ORDER){ const r = a.results[k]; if(!r || skippedMod(r) || !TESTDATA[a.test]) continue;
-    for(const q of Exam.qs(a.test, k)){ if(isBlank(r.answers[q.n])) continue; const d = D[q.domain] = D[q.domain] || {c:0, n:0, rw:MODS[k].kind === "rw"}; d.n++; if(r.correct[q.n]) d.c++; } }
+    for(const q of Exam.qs(a.test, k, a)){ if(isBlank(r.answers[q.n])) continue; const d = D[q.domain] = D[q.domain] || {c:0, n:0, rw:MODS[k].kind === "rw"}; d.n++; if(r.correct[q.n]) d.c++; } }
   return D;
 }
 function barRows(D, names){
@@ -2088,7 +2089,7 @@ function reviewView(id){
   const e = estimate(a), sc = sectionScores(a), sl = scoreLine(a), mods = a.modules.filter(k => a.results[k]), took = mods.filter(k => !skippedMod(a.results[k])), L = attemptLabel(a);
   let misses = 0, silent = 0, flagged = 0, flaggedOk = 0, slowN = 0, blanks = 0;
   const slowAt = (k, q) => slowLimit(q.src ? q.src.k : k);
-  for(const k of took){ const r = a.results[k]; for(const q of Exam.qs(a.test, k)){ const ok = r.correct[q.n], bl = isBlank(r.answers[q.n]), fl = r.flags.includes(q.n);
+  for(const k of took){ const r = a.results[k]; for(const q of Exam.qs(a.test, k, a)){ const ok = r.correct[q.n], bl = isBlank(r.answers[q.n]), fl = r.flags.includes(q.n);
     if(bl) blanks++; else if(!ok){ misses++; if(!fl) silent++; } if(fl){ flagged++; if(ok) flaggedOk++; } if((r.times[q.n] || 0) > slowAt(k, q)) slowN++; } }
   const title = a.items ? (isTailored(a.test) ? "Tailored set" : "Redo drill") : "Test " + esc(a.test) + (a.kind === "full" ? " report" : a.kind === "section" ? ", " + L.what : ", " + MODNAME[a.modules[0]]);
   const lead = dateStr(a.createdAt) + (a.items ? ", " + MODNAME[a.modules[0]] : a.kind === "full" && L.what !== "Full test" ? ", " + L.what : "") + (a.done ? "" : ", unfinished");
@@ -2099,7 +2100,7 @@ function reviewView(id){
   const cells = '<div class="mgrid">' + mods.map(k => { const r = a.results[k], sk = skippedMod(r);
     return '<div class="mcell' + (sk ? " sk" : "") + '"><span class="mn">' + (a.items ? "Score" : MODNAME[k]) + "</span>" + (sk ? '<span class="mv">Skipped</span><span class="fine">Not scored</span>'
       : '<span class="mv">' + r.score + "<small>/" + r.total + '</small></span><span class="fine">' + fmt(r.timeUsed) + " of " + modMins(a, k) + ":00" + (r.predicted != null && r.predicted !== "" ? ", guessed " + esc(r.predicted) : "") + "</span>") + '<span class="dots" aria-hidden="true">' +
-      Exam.qs(a.test, k).map(q => '<i class="' + (sk ? "sk" : r.correct[q.n] ? "" : isBlank(r.answers[q.n]) ? "om" : "no") + '"></i>').join("") + "</span></div>"; }).join("") + "</div>";
+      Exam.qs(a.test, k, a).map(q => '<i class="' + (sk ? "sk" : r.correct[q.n] ? "" : isBlank(r.answers[q.n]) ? "om" : "no") + '"></i>').join("") + "</span></div>"; }).join("") + "</div>";
   const ins = [];
   if(took.length){
     ins.push("<li><b>" + (misses ? silent : 0) + "</b><span>" + (misses ? "misses you never marked" : "misses") + "</span></li>");
@@ -2108,13 +2109,13 @@ function reviewView(id){
     ins.push("<li><b>" + slowN + "</b><span>over pace</span></li>");
   }
   const counts = {all:0, no:0, om:0, fl:0, slow:0};
-  for(const k of mods){ const r = a.results[k], sk = skippedMod(r); for(const q of Exam.qs(a.test, k)){ counts.all++; if(sk) continue; const bl = isBlank(r.answers[q.n]);
+  for(const k of mods){ const r = a.results[k], sk = skippedMod(r); for(const q of Exam.qs(a.test, k, a)){ counts.all++; if(sk) continue; const bl = isBlank(r.answers[q.n]);
     if(bl) counts.om++; else if(!r.correct[q.n]) counts.no++; if(r.flags.includes(q.n)) counts.fl++; if((r.times[q.n] || 0) > slowAt(k, q)) counts.slow++; } }
   const tabs = [["all","All"],["no","Missed"]].concat(counts.om ? [["om","Blank"]] : []).concat([["fl","Marked"],["slow","Slow"]]);
   const F = counts[S.review.filter] ? S.review.filter : "all";
   let list = '<div class="qhead"><h2>Questions</h2><nav class="seg" aria-label="Filter questions">' + tabs.map(([f, l]) => '<button data-act="filter" data-f="' + f + '" aria-pressed="' + (F === f) + '">' + l + '<span class="c">' + counts[f] + "</span></button>").join("") + "</nav></div>";
   for(const k of mods){ const r = a.results[k], sk = skippedMod(r);
-    const rows = Exam.qs(a.test, k).filter(q => { const bl = isBlank(r.answers[q.n]); return F === "all" || (!sk && ((F === "no" && !bl && !r.correct[q.n]) || (F === "om" && bl) || (F === "fl" && r.flags.includes(q.n)) || (F === "slow" && (r.times[q.n] || 0) > slowAt(k, q)))); });
+    const rows = Exam.qs(a.test, k, a).filter(q => { const bl = isBlank(r.answers[q.n]); return F === "all" || (!sk && ((F === "no" && !bl && !r.correct[q.n]) || (F === "om" && bl) || (F === "fl" && r.flags.includes(q.n)) || (F === "slow" && (r.times[q.n] || 0) > slowAt(k, q)))); });
     if(rows.length) list += '<section class="sheet qsheet"><header class="sh"><h2>' + MODNAME[k] + (sk ? '<span class="pill">Skipped</span>' : "") + '</h2><span class="fine">' + plural(rows.length, "question") + '</span></header><div class="qlist">' + rows.map(q => qrow(a, k, r, q)).join("") + "</div></section>"; }
   const next = isTailored(a.test) ? '<section class="sheet bk-next"' + rv(3) + '><div><h2>Keep going</h2><p class="fine">Tag the questions you missed below, then build the next set. It will bring these misses back for review and aim at whatever they point to.</p></div><div class="row"><button class="btn primary" data-act="bk-again" data-sec="' + (a.modules[0] === "BR" ? "rw" : "math") + '">Next tailored set</button><a class="btn" href="#bank">Question bank</a></div></section>' : "";
   return [hero(title, lead, side), '<section class="sheet"' + rv(2) + ">" + secs + cells + "</section>" + (ins.length ? '<section class="sheet"' + rv(3) + '><ul class="insights">' + ins.join("") + "</ul></section>" : "") + next + '<div class="qwrap">' + list + "</div>"];
@@ -3191,7 +3192,7 @@ document.addEventListener("toggle", e => {
   const d = e.target; if(d.matches && d.matches("details[data-faq]")){ S.faqOpen[d.dataset.faq] = d.open; return; }
   if(!d.matches || !d.matches("details.qrow")) return;
   const key = d.dataset.key, a = S.attempts[S.route.id]; if(!a) return;
-  if(d.open && !S.review.open[key]){ S.review.open[key] = true; const [k, nq] = key.split("-"); const q = Exam.qs(a.test, k).find(x => x.n === +nq);
+  if(d.open && !S.review.open[key]){ S.review.open[key] = true; const [k, nq] = key.split("-"); const q = Exam.qs(a.test, k, a).find(x => x.n === +nq);
     d.insertAdjacentHTML("beforeend", detail(a, k, a.results[k], q, key, (a.tags || {})[key] || {})); }
   else if(!d.open && S.review.open[key]){ delete S.review.open[key]; const det = d.querySelector(".detail"); if(det) det.remove(); }
 }, true);
@@ -3236,7 +3237,7 @@ Track.start();
 <script>
 /* start the app once the test data arrives; the static home page above is already on screen */
 (function(){
-  var url = "data/tests.4d0e9fb51a.json", tries = 0;
+  var url = "data/tests.0869ce00af.json", tries = 0;
   function fail(){
     document.documentElement.classList.remove("nopre");
     var a = document.getElementById("app");
