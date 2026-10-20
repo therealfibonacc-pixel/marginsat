@@ -25,7 +25,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600&family=Geist:wght@300..700&family=Noto+Sans:wght@400;600;700&family=Noto+Serif:ital,wght@0,400;0,700;1,400&display=swap">
 <style>:root{padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
-<link rel="stylesheet" href="assets/app.css?v=83b12fcd57">
+<link rel="stylesheet" href="assets/app.css?v=5b3915309c">
 <link rel="stylesheet" href="assets/katex.css?v=2fea38b1e4">
 </head>
 <body>
@@ -1980,23 +1980,6 @@ function guideView(){
 }
 /* ----- history ----- */
 function chartW(){ const vw = document.documentElement.clientWidth || innerWidth, gut = Math.min(40, Math.max(16, vw * .04)), pad = vw <= 560 ? 18 : 24; return Math.round(Math.max(260, Math.min(1040, vw - 2 * gut) - 2 * pad)); }
-function scoreChart(){
-  const pts = fullDone().map(a => ({a, e:estimate(a)}));
-  const W = chartW(), H = W < 520 ? 190 : 240, ml = 40, mr = 46, mt = 14, mb = 30, iw = W - ml - mr, ih = H - mt - mb;
-  const vals = pts.map(p => p.e.total), lo = Math.max(400, Math.floor((Math.min(...vals) - 50) / 100) * 100), hi = Math.min(1600, Math.ceil((Math.max(...vals) + 50) / 100) * 100);
-  const step = hi - lo > 400 ? 200 : 100;
-  const X = i => ml + (pts.length === 1 ? iw / 2 : i * iw / (pts.length - 1)), Y = v => mt + ih - (v - lo) / (hi - lo) * ih;
-  let g = ""; for(let v = lo; v <= hi; v += step) g += '<line x1="' + ml + '" x2="' + (W - mr) + '" y1="' + Y(v) + '" y2="' + Y(v) + '"/><text x="' + (ml - 12) + '" y="' + (Y(v) + 4) + '" text-anchor="end">' + v + "</text>";
-  const every = Math.max(1, Math.ceil(pts.length / (W < 520 ? 3 : 6)));
-  let xs = "", lastLab = ""; pts.forEach((p, i) => { const lab = dayStr(p.a.createdAt); if((i % every === 0 || i === pts.length - 1) && lab !== lastLab){ xs += '<text x="' + X(i) + '" y="' + (H - 6) + '" text-anchor="' + (i === 0 && pts.length > 1 ? "start" : i === pts.length - 1 && pts.length > 1 ? "end" : "middle") + '">' + esc(lab) + "</text>"; lastLab = lab; } });
-  const line = pts.map((p, i) => (i ? "L" : "M") + X(i).toFixed(1) + " " + Y(p.e.total).toFixed(1)).join(" ");
-  const area = pts.length > 1 ? '<path class="area" d="' + line + " L" + X(pts.length - 1).toFixed(1) + " " + (mt + ih) + " L" + X(0).toFixed(1) + " " + (mt + ih) + ' Z"/>' : "";
-  const last = pts[pts.length - 1];
-  const dots = pts.map((p, i) => '<circle class="pt' + (i === pts.length - 1 ? " end" : "") + '" cx="' + X(i).toFixed(1) + '" cy="' + Y(p.e.total).toFixed(1) + '" r="' + (i === pts.length - 1 ? 5 : 3.5) + '"/>').join("");
-  const hits = pts.map((p, i) => { const w = pts.length === 1 ? iw : iw / (pts.length - 1); return '<rect class="hit" x="' + (X(i) - w / 2).toFixed(1) + '" y="' + mt + '" width="' + w.toFixed(1) + '" height="' + ih + '" data-tip="' + esc("Test " + p.a.test + ", " + dayStr(p.a.createdAt) + ": " + p.e.total) + '" data-x="' + X(i).toFixed(1) + '" data-y="' + Y(p.e.total).toFixed(1) + '"/>'; }).join("");
-  return '<div class="chart line-chart"><svg viewBox="0 0 ' + W + " " + H + '" width="' + W + '" height="' + H + '" role="img" aria-label="Estimated score for each full test, latest ' + last.e.total + '"><defs><linearGradient id="cb-fill" x1="0" y1="0" x2="0" y2="1"><stop offset="0" class="g0"/><stop offset="1" class="g1"/></linearGradient></defs><g class="grid">' + g + '</g><g class="xs">' + xs + "</g>" + area + (pts.length > 1 ? '<path class="line" d="' + line + '"/>' : "") + dots +
-    '<text class="endlab" x="' + (X(pts.length - 1) + 12) + '" y="' + (Y(last.e.total) + 4) + '">' + last.e.total + "</text>" + hits + '</svg><div class="tip" aria-hidden="true"></div></div>';
-}
 function attemptLabel(a){
   if(a.items) return {name:isTailored(a.test) ? "Tailored set" : "Redo drill", what:MODNAME[a.modules[0]]};
   const took = sec => (sec === "rw" ? ["RW1","RW2"] : ["M1","M2"]).some(k => tookMod(a, k));
@@ -2005,19 +1988,80 @@ function attemptLabel(a){
   else if(a.kind === "full") what = took("rw") && took("math") ? "Full test" : took("rw") ? "Reading and Writing only, Math skipped" : took("math") ? "Math only, Reading and Writing skipped" : a.done ? "Full test, skipped" : "Full test";
   return {name:"Practice Test " + esc(a.test), what};
 }
+/* section scores over time: one line for each section, from every attempt that scored it */
+function sectionChart(){
+  const pts = attemptsList().map(a => ({a, s:sectionScores(a)})).filter(p => p.s);
+  if(!pts.length) return "";
+  const W = chartW(), H = W < 520 ? 200 : 250, ml = 40, mr = W < 520 ? 58 : 84, mt = 16, mb = 30, iw = W - ml - mr, ih = H - mt - mb;
+  const vals = pts.flatMap(p => [p.s.rw, p.s.math].filter(v => v != null));
+  let lo = Math.max(200, Math.floor((Math.min(...vals) - 40) / 100) * 100), hi = Math.min(800, Math.ceil((Math.max(...vals) + 40) / 100) * 100);
+  if(hi - lo < 200){ if(hi === 800) lo = 600; else hi = Math.min(800, lo + 200); }
+  const step = hi - lo > 300 ? 200 : 100;
+  const X = i => ml + (pts.length === 1 ? iw / 2 : i * iw / (pts.length - 1)), Y = v => mt + ih - (v - lo) / (hi - lo) * ih;
+  let g = ""; for(let v = lo; v <= hi; v += step) g += '<line x1="' + ml + '" x2="' + (W - mr) + '" y1="' + Y(v) + '" y2="' + Y(v) + '"/><text x="' + (ml - 12) + '" y="' + (Y(v) + 4) + '" text-anchor="end">' + v + "</text>";
+  const every = Math.max(1, Math.ceil(pts.length / (W < 520 ? 3 : 6)));
+  let xs = "", lastLab = ""; pts.forEach((p, i) => { const lab = dayStr(p.a.createdAt); if((i % every === 0 || i === pts.length - 1) && lab !== lastLab){ xs += '<text x="' + X(i) + '" y="' + (H - 6) + '" text-anchor="' + (i === 0 && pts.length > 1 ? "start" : i === pts.length - 1 && pts.length > 1 ? "end" : "middle") + '">' + esc(lab) + "</text>"; lastLab = lab; } });
+  const SER = [["rw", "R&W", "Reading and Writing"], ["math", "Math", "Math"]];
+  let lines = "", dots = "", ends = [];
+  for(const [k, sh] of SER){
+    const idx = pts.map((p, i) => [i, p.s[k]]).filter(x => x[1] != null); if(!idx.length) continue;
+    if(idx.length > 1) lines += '<path class="sline s-' + k + '" d="' + idx.map(([i, v], j) => (j ? "L" : "M") + X(i).toFixed(1) + " " + Y(v).toFixed(1)).join(" ") + '"/>';
+    dots += idx.map(([i, v], j) => '<circle class="spt s-' + k + (j === idx.length - 1 ? " end" : "") + '" cx="' + X(i).toFixed(1) + '" cy="' + Y(v).toFixed(1) + '" r="' + (j === idx.length - 1 ? 5 : 3.5) + '"/>').join("");
+    const [li, lv] = idx[idx.length - 1]; ends.push({k, sh, x:X(li), y:Y(lv), v:lv});
+  }
+  if(ends.length === 2 && Math.abs(ends[0].y - ends[1].y) < 16){ const up = ends[0].y <= ends[1].y ? 0 : 1; ends[up].y -= 8; ends[1 - up].y += 8; }
+  const labs = ends.map(e => '<text class="slab" x="' + (e.x + 12).toFixed(1) + '" y="' + (e.y + 4).toFixed(1) + '">' + e.sh + " " + e.v + "</text>").join("");
+  const hits = pts.map((p, i) => { const w = pts.length === 1 ? iw : iw / (pts.length - 1), v = p.s, top = Math.min(...[v.rw, v.math].filter(x => x != null));
+    const tip = (/^\d+$/.test(String(p.a.test)) ? "Test " + p.a.test : "Practice") + ", " + dayStr(p.a.createdAt) + ": R&W " + (v.rw != null ? v.rw : "skipped") + ", Math " + (v.math != null ? v.math : "skipped") + (v.rw != null && v.math != null ? ", total " + (v.rw + v.math) : "");
+    return '<rect class="hit" x="' + (X(i) - w / 2).toFixed(1) + '" y="' + mt + '" width="' + w.toFixed(1) + '" height="' + ih + '" data-tip="' + esc(tip) + '" data-x="' + X(i).toFixed(1) + '" data-y="' + Y(Math.max(...[v.rw, v.math].filter(x => x != null))).toFixed(1) + '"/>'; }).join("");
+  const legend = '<p class="s-legend">' + SER.map(([k, , n]) => '<span><i class="s-' + k + '"></i>' + n + "</span>").join("") + "</p>";
+  return legend + '<div class="chart line-chart sec-chart"><svg viewBox="0 0 ' + W + " " + H + '" width="' + W + '" height="' + H + '" role="img" aria-label="Section scores for each test, latest ' + ends.map(e => e.sh + " " + e.v).join(", ") + '"><g class="grid">' + g + '</g><g class="xs">' + xs + "</g>" + lines + dots + labs + hits + '</svg><div class="tip" aria-hidden="true"></div></div>';
+}
+/* how sure we are about a skill: never from skipped or blank questions */
+function masteryOf(it){
+  if(!it || !it.n) return {k:"new", l:"Not started"};
+  if(it.state === "done") return {k:"done", l:"Checked off"};
+  if(it.n < 5) return {k:"early", l:"Too early to tell"};
+  if(it.p >= .7) return {k:"solid", l:"Solid"};
+  if(it.p >= .5) return {k:"mid", l:"Getting there"};
+  return {k:"low", l:"Needs work"};
+}
+function masterySheet(i){
+  const C = Checklist.compute(), sort = S.msSort === "weak" ? "weak" : "dom";
+  const all = Object.values(C.bySkill), lv = it => masteryOf(it).k;
+  const cnt = k => all.filter(it => lv(it) === k).length;
+  const row = it => { const m = masteryOf(it), w = Math.max(1, Math.round(BANKMETA.weights[it.s] || .5)), pct = Math.round(it.p * 100);
+    return '<div class="ms-row ' + m.k + '"><span class="ms-n"><b>' + esc(shortSkill(it.s)) + '</b><span class="fine">' + (it.n ? it.c + " of " + it.n + " right" : "No answers yet") + " · about " + plural(w, "question") + " per test</span></span>" +
+      '<span class="ms-meter">' + (it.n ? pctBar(it.p) : '<span class="bk-pbar none"></span>') + '<span class="ms-l">' + (m.k === "done" ? '<span class="ck-box done xs">' + IC_CHECK + "</span>" : "") + m.l + '</span></span><span class="ms-p">' + (it.n ? pct + "%" : "") + "</span>" +
+      '<button class="btn sm quiet ms-go" data-act="ck-practice" data-s="' + esc(it.s) + '" aria-label="Practice ' + esc(shortSkill(it.s)) + '">Practice</button></div>'; };
+  const col = sec => { const doms = BANKMETA.skills[sec];
+    if(sort === "weak"){ const L = Object.values(doms).flat().map(sk => C.bySkill[sk]).filter(Boolean).sort((a, b) => (!!b.n - !!a.n) || (a.state === "done") - (b.state === "done") || a.p - b.p);
+      return '<div class="ms-col"><h3 class="gh">' + SEC_NAME[sec] + "</h3>" + L.map(row).join("") + "</div>"; }
+    return '<div class="ms-col"><h3 class="gh">' + SEC_NAME[sec] + "</h3>" + Object.entries(doms).map(([dom, list]) => '<div class="ms-dom"><span class="bk-dn">' + esc(dom) + "</span>" + list.map(sk => C.bySkill[sk]).filter(Boolean).map(row).join("") + "</div>").join("") + "</div>"; };
+  const seg = '<nav class="seg" aria-label="Order skills">' + [["dom", "By domain"], ["weak", "Weakest first"]].map(([v, l]) => '<button data-act="ms-sort" data-v="' + v + '" aria-pressed="' + (sort === v) + '">' + l + "</button>").join("") + "</nav>";
+  const sum = '<p class="ms-sum"><span><i class="done"></i>' + cnt("done") + ' checked off</span><span><i class="solid"></i>' + cnt("solid") + ' solid</span><span><i class="mid"></i>' + cnt("mid") + ' getting there</span><span><i class="low"></i>' + cnt("low") + ' need work</span><span><i class="new"></i>' + (cnt("new") + cnt("early")) + " not enough answers yet</span></p>";
+  return '<section class="sheet ms-sheet" id="mastery"' + rv(i) + '><header class="sh"><div><h2>Skill mastery</h2><p class="fine">Each bar is your estimated chance on a Harder question in that skill, built from every answer you’ve given on tests, drills, concept drills and the bank. Skipped sections and blank answers don’t count.</p></div>' + seg + "</header>" + sum +
+    '<div class="ms-cols">' + col("rw") + col("math") + "</div></section>";
+}
+function scoreTiles(){
+  const list = attemptsList().map(a => ({a, s:sectionScores(a), e:estimate(a)})).filter(x => x.s);
+  if(!list.length) return "";
+  const last = k => { const l = list.filter(x => x.s[k] != null); return l.length ? {v:l[l.length - 1].s[k], best:Math.max(...l.map(x => x.s[k])), n:l.length, prev:l.length > 1 ? l[l.length - 2].s[k] : null} : null; };
+  const rw = last("rw"), m = last("math"), fulls = list.filter(x => x.e), lf = fulls[fulls.length - 1];
+  const tile = (lab, o, of) => '<div><span class="fine">' + lab + "</span>" + (o ? '<span class="sec-n">' + o.v + delta(o.prev != null ? o.v - o.prev : 0) + '</span><span class="fine">Best ' + o.best + " · " + plural(o.n, "attempt") + "</span>" : '<span class="sec-n sk">None yet</span><span class="fine">Take ' + of + " to see it</span>") + "</div>";
+  const tot = lf ? {v:lf.e.total, best:Math.max(...fulls.map(x => x.e.total)), n:fulls.length, prev:fulls.length > 1 ? fulls[fulls.length - 2].e.total : null} : null;
+  return '<div class="secs ms-tiles">' + tile("Latest total", tot, "a full test") + tile("Reading and Writing", rw, "the section") + tile("Math", m, "the section") + "</div>";
+}
 function progressView(){
-  const list = attemptsList().slice().reverse(), done = fullDone(), D = domainStats(), names = Object.keys(D);
+  const list = attemptsList().slice().reverse(), any = list.some(a => sectionScores(a));
   let body = "";
-  if(done.length) body += '<section class="sheet"' + rv(2) + '><header class="sh"><h2>Estimated score</h2></header>' + scoreChart() + "</section>";
-  body += '<section class="sheet"' + rv(done.length ? 3 : 2) + '><header class="sh"><h2>Attempts</h2></header>' + (list.length ? '<div class="alist">' + list.map(a => { const sl = scoreLine(a), L = attemptLabel(a), r = a.kind === "full" || a.kind === "section" ? null : a.results[a.modules[0]];
+  if(any) body += '<section class="sheet"' + rv(2) + '><header class="sh"><h2>Scores</h2></header>' + scoreTiles() + sectionChart() + "</section>";
+  body += masterySheet(any ? 3 : 2);
+  body += '<section class="sheet"' + rv(any ? 4 : 3) + '><header class="sh"><h2>Attempts</h2></header>' + (list.length ? '<div class="alist">' + list.map(a => { const sl = scoreLine(a), L = attemptLabel(a), r = a.kind === "full" || a.kind === "section" ? null : a.results[a.modules[0]];
       const val = sl ? sl.n + (sl.short ? "<small> " + sl.short + "</small>" : "") : r ? (skippedMod(r) ? "<small>Skipped</small>" : r.score + "<small>/" + r.total + "</small>") : a.done ? "<small>Skipped</small>" : "";
       return '<a class="arow" href="#review-' + esc(a.id) + '"><span class="an"><b>' + L.name + '</b><span class="sub">' + L.what + ", " + dayStr(a.createdAt) + (a.done ? "" : ", unfinished") + '</span></span><span></span><span class="av2">' + val + '</span><span class="chev">' + IC_CHEV + "</span></a>"; }).join("") + "</div>"
     : '<div class="emptyst"><p>Nothing here yet. Test 1 is free and takes about two and a quarter hours.</p><button class="btn primary" data-act="start" data-test="1" data-kind="full">Start Test 1</button></div>') + "</section>";
-  if(names.length){
-    const groups = [["Reading and Writing", names.filter(n => D[n].rw)], ["Math", names.filter(n => !D[n].rw)]].filter(g => g[1].length);
-    body += '<section class="sheet"' + rv(4) + '><header class="sh"><h2>Skills</h2></header><div class="skills">' + groups.map(([g, l]) => '<div><h3 class="gh">' + g + "</h3>" + barRows(D, l.sort((a, b) => D[a].c / D[a].n - D[b].c / D[b].n)) + "</div>").join("") + "</div></section>";
-  }
-  return [hero("History", "Every test, module and drill you’ve taken."), body];
+  return [hero("History", "Your scores, every skill you’re building, and everything you’ve taken."), body];
 }
 
 /* ----- redo bank and drills (beta) ----- */
@@ -3103,6 +3147,7 @@ document.addEventListener("click", e => {
     case "unlock-open": S.unlockOpen = S.unlockOpen === t.dataset.test ? null : t.dataset.test; S.unlockErr = ""; S.codeDraft = ""; S.modsOpen = null; render(); if(S.unlockOpen) focusCode(); break;
     case "mods-open": S.modsOpen = S.modsOpen === t.dataset.test ? null : t.dataset.test; S.unlockOpen = null; render(); break;
     case "filter": S.review.filter = t.dataset.f; render(); break;
+    case "ms-sort": S.msSort = t.dataset.v; render(); break;
     case "jump": { e.preventDefault(); const el = document.getElementById(t.dataset.to); if(el) el.scrollIntoView({behavior:matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block:"start"}); break; }
     case "tag": { const a = clone(S.attempts[t.dataset.id]); a.tags = a.tags || {}; const key = t.dataset.key, cur = a.tags[key] || {};
       cur.tag = cur.tag === t.dataset.tag ? null : t.dataset.tag; a.tags[key] = cur; App.saveAttempt(a);
